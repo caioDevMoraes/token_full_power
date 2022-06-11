@@ -80,8 +80,6 @@ contract CryptoToken is IERC20 {
     }
 
     function toMint(uint256 amount) public override isOwner isActived returns(bool) {
-        //require(account != address(0), "ERC20: mint to the zero address");
-
         totalsupply += amount;
         addressToBalance[msg.sender] += amount;
 
@@ -91,8 +89,6 @@ contract CryptoToken is IERC20 {
     }
 
     function toBurn(uint256 amount) public override isOwner isActived returns(bool) {
-        //require(account != address(0), "ERC20: mint to the zero address");
-
         totalsupply -= amount;
         addressToBalance[msg.sender] -= amount;
 
@@ -102,7 +98,6 @@ contract CryptoToken is IERC20 {
     }
 
     function changeState(uint8 newState) public isOwner returns(bool) {
-
         require(newState < 3, "Invalid status option!");
 
         if (newState == 0) {
@@ -120,12 +115,10 @@ contract CryptoToken is IERC20 {
     }
 
     // Kill
-    function kill() public isOwner returns(bool) {
+    function kill() public isOwner {
         require(contractState == status.CANCELLED, "It's necessary to cancel the contract before to kill it!");
         emit Killed(msg.sender);
         selfdestruct(payable(owner));
-        
-        return true;
     }
 
 }
