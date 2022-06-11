@@ -27,8 +27,8 @@ describe("CryptoToken", function() {
   it("checking if the total supply is correct and checking if the balance of an address is correct", async function() {
     const [owner] = await ethers.getSigners()
 
-    const CriptoToken = await ethers.getContractFactory("CriptoToken")
-    const token = await CriptoToken.deploy(1000000000000)
+    const CryptoToken = await ethers.getContractFactory("CryptoToken")
+    const token = await CryptoToken.deploy(1000000000000)
     await token.deployed()
 
     const expectedValue = 1000000000000
@@ -41,8 +41,8 @@ describe("CryptoToken", function() {
   it("checking if the total supply is incorrect and checking if the balance of an address is incorrect", async function() {
     const [owner] = await ethers.getSigners()
 
-    const CriptoToken = await ethers.getContractFactory("CriptoToken")
-    const token = await CriptoToken.deploy(1000000000000)
+    const CryptoToken = await ethers.getContractFactory("CryptoToken")
+    const token = await CryptoToken.deploy(1000000000000)
     await token.deployed()
     
     const expectedValue = 1000
@@ -55,8 +55,8 @@ describe("CryptoToken", function() {
   it("checking the transfer, if you are subtracting the value of the sent and adding the receiver", async function() {
     const [owner, receiver] = await ethers.getSigners()
     
-    const CriptoToken = await ethers.getContractFactory("CriptoToken");
-    const token = await CriptoToken.deploy(10000);
+    const CryptoToken = await ethers.getContractFactory("CryptoToken");
+    const token = await CryptoToken.deploy(10000);
     await token.deployed()
 
     const currentBalanceOwner = await token.balanceOf(owner.address)
@@ -78,8 +78,8 @@ describe("CryptoToken", function() {
   it("checking multiple outgoing balance transfers", async function() {
     const [owner, receiver1, receiver2, receiver3] = await ethers.getSigners()
 
-    const CriptoToken = await ethers.getContractFactory("CriptoToken")
-    const token = await CriptoToken.deploy(10000)
+    const CryptoToken = await ethers.getContractFactory("CryptoToken")
+    const token = await CryptoToken.deploy(10000)
     await token.deployed()
 
     const currentBalanceOwner = await token.balanceOf(owner.address)
@@ -107,8 +107,8 @@ describe("CryptoToken", function() {
   it("checking multiple balance gain transfers", async function() {
     const [owner, sender1, sender2, sender3] = await ethers.getSigners()
 
-    const CriptoToken = await ethers.getContractFactory("CriptoToken")
-    const token = await CriptoToken.deploy(9000)
+    const CryptoToken = await ethers.getContractFactory("CryptoToken")
+    const token = await CryptoToken.deploy(9000)
     await token.deployed()
 
     const amountSent = 3000
@@ -141,158 +141,89 @@ describe("CryptoToken", function() {
 
     expect(parseInt(currentBalanceOwner) + (amountSent * 3)).to.equal(modifiedBalanceOwner)
   })
+
+  it("checking the current state", async function() {
+    const CryptoToken = await ethers.getContractFactory("CryptoToken")
+    const token = await CryptoToken.deploy(9000)
+    await token.deployed()
+
+    const expectedState = 0
+
+    expect(await token.state()).to.equal(expectedState)
+  })
+
+  it("checking if the state is changing", async function() {
+    const CryptoToken = await ethers.getContractFactory("CryptoToken")
+    const token = await CryptoToken.deploy(9000)
+    await token.deployed()
+    
+    const currentState = await token.state()
+
+    const changeState = await token.changeState(1)
+    await changeState.wait()
+
+    const modifiedState = await token.state()
+
+    expect(currentState != modifiedState).to.equal(true)
+  })
+
+  it("checking if you are adding tokens and checking if the owner is getting the mint value", async function() {
+    const [owner] = await ethers.getSigners()
+    
+    const CryptoToken = await ethers.getContractFactory("CryptoToken")
+    const token = await CryptoToken.deploy(9000)
+    await token.deployed()
+
+    const currentTotalSupply = await token.totalSupply()
+    const currentBalanceOwner = await token.balanceOf(owner.address)
+
+    const amount = 1000
+
+    const toMint = await token.toMint(amount)
+    await toMint.wait()
+
+    const modifiedTotalSupply = await token.totalSupply()
+    const modifiedBalanceOwner = await token.balanceOf(owner.address)
+
+    expect(parseInt(currentTotalSupply) + amount).to.equal(modifiedTotalSupply)
+    expect(parseInt(currentBalanceOwner) + amount).to.equal(modifiedBalanceOwner)
+  })
+
+  it("checking if it is burning token the total supply and the owner's address", async function() {
+    const [owner] = await ethers.getSigners()
+    
+    const CryptoToken = await ethers.getContractFactory("CryptoToken")
+    const token = await CryptoToken.deploy(11000)
+    await token.deployed()
+
+    const currentTotalSupply = await token.totalSupply()
+    const currentBalanceOwner = await token.balanceOf(owner.address)
+
+    const amount = 1000
+
+    const toBurn = await token.toBurn(amount)
+    await toBurn.wait()
+
+    const modifiedTotalSupply = await token.totalSupply()
+    const modifiedBalanceOwner = await token.balanceOf(owner.address)
+
+    expect(parseInt(currentTotalSupply) - amount).to.equal(modifiedTotalSupply)
+    expect(parseInt(currentBalanceOwner) - amount).to.equal(modifiedBalanceOwner)
+  })
+
+  it("checking if it's killing the contract", async function() {
+    const CryptoToken = await ethers.getContractFactory("CryptoToken")
+    const token = await CryptoToken.deploy(11000)
+    await token.deployed()
+
+    const changeState = await token.changeState(2)
+    await changeState.wait()
+
+    const kill = await token.kill()
+    await kill.wait()
+
+    console.log(kill);
+    // expect(await token.kill()).to.equal(true)
+  })
 })
 
-describe("Airdrop", function() {
-  
-  // it("checking if the log functions are okay", async function() {
-  //   const [owner] = await ethers.getSigners()
-
-  //   const CriptoToken = await ethers.getContractFactory("CriptoToken")
-  //   const token = await CriptoToken.deploy(9000)
-  //   await token.deployed()  
-
-  //   const Airdrop = await ethers.getContractFactory("Airdrop")
-  //   const airdrop = await Airdrop.deploy(token.address)
-  //   await airdrop.deployed()
-
-  //   const currentState = await airdrop.getState()
-    
-
-  // })
-
-  it("checking if address is subscribing", async function() {
-    const CriptoToken = await ethers.getContractFactory("CriptoToken")
-    const token = await CriptoToken.deploy(9000)
-    await token.deployed()  
-
-    const Airdrop = await ethers.getContractFactory("Airdrop")
-    const airdrop = await Airdrop.deploy(token.address)
-    await airdrop.deployed()
-
-    const currentSubscribes = await airdrop.getLengthSubscribes()
-
-    const setSubscribe = await airdrop.subscribe()
-    await setSubscribe.wait()
-
-    const addedSubscribe = await airdrop.getLengthSubscribes()
-
-    expect(parseInt(currentSubscribes) + 1).to.equal(addedSubscribe)
-  })
-
-
-  it("checking multiple subscriptions", async function() {
-    const [_, account1, account2] = await ethers.getSigners()
-
-    const CriptoToken = await ethers.getContractFactory("CriptoToken")
-    const token = await CriptoToken.deploy(9000)
-    await token.deployed()  
-
-    const Airdrop = await ethers.getContractFactory("Airdrop")
-    const airdrop = await Airdrop.deploy(token.address)
-    await airdrop.deployed()
-    
-    let cont = 0
-
-    const currentSubscribes = await airdrop.getLengthSubscribes()
-
-    const subscribes = [
-      await airdrop.subscribe(),
-      await airdrop.connect(account1).subscribe(),
-      await airdrop.connect(account2).subscribe()
-    ]
-
-    for(let i = 0; i < subscribes.length; i++) {
-      let subscribe = subscribes[i]
-      subscribe.wait()
-      cont++ 
-    }
-
-    const addedSubscribes = await airdrop.getLengthSubscribes()
-
-    expect(parseInt(currentSubscribes) + cont).to.equal(addedSubscribes)
-  })
-
-
-  it("checking if the state is being changed", async function() {
-    const CriptoToken = await ethers.getContractFactory("CriptoToken")
-    const token = await CriptoToken.deploy(9000)
-    await token.deployed()  
-
-    const Airdrop = await ethers.getContractFactory("Airdrop")
-    const airdrop = await Airdrop.deploy(token.address)
-    await airdrop.deployed()
-    
-    const currentState = await airdrop.getState()
-
-    const modifyStatus = await airdrop.modifyStatus(2)
-    await modifyStatus.wait()
-
-    const modifiedState = await airdrop.getState()
-
-    expect(currentState !== modifiedState).to.equal(true)
-  })
-
-
-  it("verification is called the execute function()", async function() {
-    const [_, account1, account2, account3, account4, account5] = await ethers.getSigners()
-
-    const CriptoToken = await ethers.getContractFactory("CriptoToken")
-    const token = await CriptoToken.deploy(9000)
-    await token.deployed()  
-
-    const Airdrop = await ethers.getContractFactory("Airdrop")
-    const airdrop = await Airdrop.deploy(token.address)
-    await airdrop.deployed()
-
-    const amountAirdrop = 5000
-    let cont = 0
-
-    await token.transfer(airdrop.address, amountAirdrop)
-
-    const subscribes = [
-      await airdrop.connect(account1).subscribe(),
-      await airdrop.connect(account2).subscribe(),
-      await airdrop.connect(account3).subscribe(),
-      await airdrop.connect(account4).subscribe(),
-      await airdrop.connect(account5).subscribe(),
-    ]
-
-    for(let i = 0; i < subscribes.length; i++) {
-      let subscribe = subscribes[i]
-      subscribe.wait()
-      cont++ 
-    }
-    
-    const balances = [
-      await token.balanceOf(account1.address), 
-      await token.balanceOf(account2.address),
-      await token.balanceOf(account3.address),
-      await token.balanceOf(account4.address),
-      await token.balanceOf(account5.address)
-    ]
-    
-    const amountBalances = balances.reduce((soma, i) => parseInt(soma) + parseInt(i))
-
-    expect(amountBalances).to.equal(amountAirdrop)
-  })
-
-  // it("checking if the address is already registered", async function() {
-  //   const [owner] = await ethers.getSigners()
-
-  //   const CriptoToken = await ethers.getContractFactory("CriptoToken")
-  //   const token = await CriptoToken.deploy(9000)
-  //   await token.deployed()  
-
-  //   const Airdrop = await ethers.getContractFactory("Airdrop")
-  //   const airdrop = await Airdrop.deploy(token.address)
-  //   await airdrop.deployed()
-
-  //   const subscribe = await airdrop.subscribe()
-  //   await subscribe.wait()
-
-  //   const hasSubscribe = await airdrop.hasSubscribed(owner.address)
-
-  //   expect(hasSubscribe).to.equal(true)
-  // })
-})
